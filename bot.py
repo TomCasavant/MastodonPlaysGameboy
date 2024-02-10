@@ -19,7 +19,7 @@ class Bot:
         self.mastodon = self.login()
         print(self.gameboy_config.get('rom'))
         rom = os.path.join(script_dir, self.gameboy_config.get('rom'))
-        self.gameboy = Gameboy(rom, False)
+        self.gameboy = Gameboy(rom, True)
 
     def simulate(self):
         while True:
@@ -113,7 +113,7 @@ class Bot:
             "start": self.gameboy.start,
             "select": self.gameboy.select
         }
-
+        print(buttons)
         # Perform the corresponding action
         if result.lower() in buttons:
             action = buttons[result.lower()]
@@ -175,8 +175,35 @@ class Bot:
         # Save game state
         self.gameboy.save()
 
+    def test(self):
+        self.gameboy.load()
+        while True:
+            inp = input("Action: ")
+            buttons = {
+                "up": self.gameboy.dpad_up,
+                "down": self.gameboy.dpad_down,
+                "right": self.gameboy.dpad_right,
+                "left": self.gameboy.dpad_left,
+                "a": self.gameboy.a,
+                "b": self.gameboy.b,
+                "start": self.gameboy.start,
+                "select": self.gameboy.select
+            }
+            # Perform the corresponding action
+            if inp.lower() in buttons:
+                action = buttons[inp.lower()]
+                #self.gameboy.tick()
+                action()
+                self.gameboy.tick(600)
+            else:
+                print(f"No action defined for '{inp}'.")
+            self.gameboy.save()
+            #self.take_action(inp)
+            #self.gameboy.tick(300)
+
 if __name__ == '__main__':
     bot = Bot()
+    #bot.test()
     bot.run()
     # for i in range(2):
     #    bot.run()

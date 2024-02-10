@@ -16,7 +16,7 @@ class Gameboy:
 
     def start_thread(self):
         self.pyboy = self.load_rom(self.rom)
-        self.pyboy.set_emulation_speed(0)
+        self.pyboy.set_emulation_speed(1)
         print(self.pyboy)
         #self.run()
 
@@ -41,6 +41,7 @@ class Gameboy:
     def dpad_up(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_UP)
         self.tick()
+        self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_UP)
         #print(self.pyboy.stop())
         #self.tick()
@@ -49,12 +50,14 @@ class Gameboy:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
         print("down")
         self.tick()
+        self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_DOWN)
         #self.tick()
 
     def dpad_right(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_RIGHT)
         print("right")
+        self.tick()
         self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_RIGHT)
         #self.tick()
@@ -63,12 +66,14 @@ class Gameboy:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_LEFT)
         print("left")
         self.tick()
+        self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_LEFT)
         #self.tick()
 
     def a(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_A)
         print("a")
+        self.tick()
         self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_A)
         #self.tick()
@@ -77,6 +82,7 @@ class Gameboy:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_B)
         print("b")
         self.tick()
+        self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_B)
         #self.tick()
 
@@ -84,12 +90,14 @@ class Gameboy:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_START)
         print("start")
         self.tick()
+        self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_START)
         #self.tick()
 
     def select(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_SELECT)
         print("select")
+        self.tick()
         self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_SELECT)
 
