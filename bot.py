@@ -72,7 +72,7 @@ class Bot:
         print(f"Logging into {server}")
         return Mastodon(access_token=self.mastodon_config.get('access_token'), api_base_url=server)
 
-    def post_poll(self, status, options, expires_in=30*60, reply_id=None):
+    def post_poll(self, status, options, expires_in=60*60, reply_id=None):
         poll = self.mastodon.make_poll(options, expires_in=expires_in, hide_totals=False)
         return self.mastodon.status_post(status, in_reply_to_id=reply_id, language='en', poll=poll)
 
@@ -153,10 +153,10 @@ class Bot:
 
         time.sleep(50)
         try:
-            post = self.mastodon.status_post(f"Previous Action: {top_result}", media_ids=[media['id']])
+            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon", media_ids=[media['id']])
         except:
             time.sleep(30)
-            post = self.mastodon.status_post(f"Previous Action: {top_result}", media_ids=[media['id']])
+            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon", media_ids=[media['id']])
 
         try:
             poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
