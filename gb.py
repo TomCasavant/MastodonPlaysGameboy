@@ -2,6 +2,9 @@ from pyboy import PyBoy, WindowEvent
 import random
 import threading
 import os
+import re
+import shutil
+
 class Gameboy:
 
     def __init__(self, rom, debug=False):
@@ -92,8 +95,19 @@ class Gameboy:
 
     def screenshot(self):
         script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
-        self.pyboy.screen_image().save(os.path.join(script_dir, 'screenshot.png'))
-        return os.path.join(script_dir, 'screenshot.png')
+        screenshot_dir = os.path.join(script_dir, 'screenshots')
+        os.makedirs(screenshot_dir, exist_ok=True)  # Create screenshots directory if it doesn't exist
+
+        # Get existing screenshot numbers
+        screenshot_numbers = [int(re.search(r'screenshot_(\d+)\.png', filename).group(1)) for filename in os.listdir(screenshot_dir) if re.match(r'screenshot_\d+\.png', filename)]
+        next_number = max(screenshot_numbers, default=0) + 1
+
+        # Save the screenshot with the next available number
+        screenshot_path = os.path.join(screenshot_dir, f'screenshot_{next_number}.png')
+        screenshot_path_full = os.path.join(script_dir, 'screenshot.png')
+        self.pyboy.screen_image().save(screenshot_path_full)
+        shutil.copyfile(screenshot_path_full, screenshot_path)  # Copy the screenshot to the screenshots directory
+        return screenshot_path_full
 
     def random_button(self):
         button = random.choice([self.dpad_up, self.dpad_down, self.dpad_right, self.dpad_left, self.a, self.b, self.start, self.select])
