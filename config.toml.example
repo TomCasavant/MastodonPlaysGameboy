@@ -1,0 +1,6 @@
+[mastodon]
+server = "https://tomkahe.com"
+access_token = ""
+
+[gameboy]
+rom = "Pokemon - Gold Version.gbc"
