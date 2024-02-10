@@ -49,6 +49,24 @@ class Bot:
                     self.gameboy.pyboy.tick()
                 #time.sleep(1)
 
+    def random_button(self):
+        buttons = {
+             "a" : self.gameboy.a,
+             "b" : self.gameboy.b,
+             "start" : self.gameboy.start,
+             "select" : self.gameboy.select,
+             "up" : self.gameboy.dpad_up,
+             "down" : self.gameboy.dpad_down,
+             "right" : self.gameboy.dpad_right,
+             "left" : self.gameboy.dpad_left
+        }
+
+        random_button = random.choice(list(buttons.keys()))
+        action = buttons[random_button]
+        action()
+        return random_button
+
+
     def login(self):
         server = self.mastodon_config.get('server')
         print(f"Logging into {server}")
@@ -119,7 +137,8 @@ class Bot:
             poll_results = poll_status.poll['options']
             max_result = max(poll_results, key=lambda x: x['votes_count'])
             if (max_result['votes_count'] == 0):
-                self.gameboy.random_button()
+                button = self.random_button()
+                top_result = f"Random (no votes, chose {button})"
             else:
                 top_result = max_result['title']
                 self.take_action(top_result)
@@ -127,23 +146,23 @@ class Bot:
         self.gameboy.tick(300) # Progress the screen to the next position
         image = self.gameboy.screenshot()
         try:
-            media = self.mastodon.media_post(image, description='Image of pokemon rom')
+            media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
         except:
             time.sleep(45)
-            media = self.mastodon.media_post(image, description='Image of pokemon rom')
+            media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
 
         time.sleep(50)
         try:
-            post = self.mastodon.status_post(f"(Test) The highest voted result was {top_result}", media_ids=[media['id']])
+            post = self.mastodon.status_post(f"Previous Action: {top_result}", media_ids=[media['id']])
         except:
             time.sleep(30)
-            post = self.mastodon.status_post(f"(Test) The highest voted result was {top_result}", media_ids=[media['id']])
+            post = self.mastodon.status_post(f"Previous Action: {top_result}", media_ids=[media['id']])
 
         try:
-            poll = self.post_poll("Pick one of the options:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
+            poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
         except:
             time.sleep(30)
-            poll = self.post_poll("Pick one of the options:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
+            poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
 
         try:
             self.pin_posts(post['id'], poll['id'])
