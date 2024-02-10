@@ -3,18 +3,23 @@ import random
 import time
 from mastodon import Mastodon
 import toml
+import os
 
 class Bot:
 
     def __init__(self, config_path="config.toml"):
-        with open('config.toml', 'r') as config_file:
+        # If config_path is not provided, use the config.toml file in the same directory as the script
+        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        config_path = os.path.join(script_dir, "config.toml")
+        with open(config_path, 'r') as config_file:
             self.config = toml.load(config_file)
             self.mastodon_config = self.config.get('mastodon', {})
             self.gameboy_config = self.config.get('gameboy', {})
 
         self.mastodon = self.login()
         print(self.gameboy_config.get('rom'))
-        self.gameboy = Gameboy(self.gameboy_config.get('rom'), True)
+        rom = os.path.join(script_dir, self.gameboy_config.get('rom'))
+        self.gameboy = Gameboy(rom, False)
 
     def simulate(self):
         while True:
@@ -49,17 +54,21 @@ class Bot:
         print(f"Logging into {server}")
         return Mastodon(access_token=self.mastodon_config.get('access_token'), api_base_url=server)
 
-    def post_poll(self, status, options, expires_in=60*60, reply_id=None):
+    def post_poll(self, status, options, expires_in=30*60, reply_id=None):
         poll = self.mastodon.make_poll(options, expires_in=expires_in, hide_totals=False)
         return self.mastodon.status_post(status, in_reply_to_id=reply_id, language='en', poll=poll)
 
     def save_ids(self, post_id, poll_id):
-        with open('ids.txt', 'w') as file:
+        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        ids_loc = os.path.join(script_dir, "ids.txt")
+        with open(ids_loc, 'w') as file:
             file.write(f"{post_id},{poll_id}")
 
     def read_ids(self):
         try:
-            with open('ids.txt', 'r') as file:
+            script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+            ids_loc = os.path.join(script_dir, "ids.txt")
+            with open(ids_loc, 'r') as file:
                 content = file.read()
                 if content:
                     post_id, poll_id = content.split(',')
@@ -92,7 +101,7 @@ class Bot:
             action = buttons[result.lower()]
             action()
         else:
-            print(f"No action defined for '{top_result_title}'.")
+            print(f"No action defined for '{result}'.")
 
     def run(self):
         self.gameboy.load()
@@ -111,7 +120,9 @@ class Bot:
             max_result = max(poll_results, key=lambda x: x['votes_count'])
             if (max_result['votes_count'] == 0):
                 self.gameboy.random_button()
-            self.take_action(top_result)
+            else:
+                top_result = max_result['title']
+                self.take_action(top_result)
 
         self.gameboy.tick(300) # Progress the screen to the next position
         image = self.gameboy.screenshot()

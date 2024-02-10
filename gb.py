@@ -91,16 +91,19 @@ class Gameboy:
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_SELECT)
 
     def screenshot(self):
-        self.pyboy.screen_image().save('screenshot.png')
-        return 'screenshot.png'
+        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        self.pyboy.screen_image().save(os.path.join(script_dir, 'screenshot.png'))
+        return os.path.join(script_dir, 'screenshot.png')
 
     def random_button(self):
         button = random.choice([self.dpad_up, self.dpad_down, self.dpad_right, self.dpad_left, self.a, self.b, self.start, self.select])
         button()
 
     def load(self):
-        if os.path.exists("save.state"):
-            with open("save.state", "rb") as file:
+        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        save_loc = os.path.join(script_dir, "save.state")
+        if os.path.exists(save_loc):
+            with open(save_loc, "rb") as file:
                 self.pyboy.load_state(file)
             return True
         else:
@@ -108,6 +111,9 @@ class Gameboy:
             return False
 
     def save(self):
-        with open("save.state", "wb") as file:
+        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        save_loc = os.path.join(script_dir, "save.state")
+
+        with open(save_loc, "wb") as file:
             self.pyboy.save_state(file)
 
