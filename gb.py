@@ -4,7 +4,7 @@ import threading
 import os
 import re
 import shutil
-from PIL import Image
+from PIL import Image, ImageDraw
 from moviepy.editor import ImageSequenceClip
 
 class Gameboy:
@@ -45,6 +45,12 @@ class Gameboy:
         images = []
         print(len(image_files))
         for file in image_files:
+            gameboy_outline = Image.open('gameboy.png').convert("RGB")
+            img = Image.open(os.path.join(gif_dir, file)).convert("RGB")
+            img = img.resize((181, 163))
+            combined = gameboy_outline.copy()
+            combined.paste(img, (165, 151))
+            combined.save(os.path.join(gif_dir, file))
             images.append(os.path.join(gif_dir, file))
             #with Image.open(os.path.join(gif_dir, file)) as img:
             #    images.append(img.copy())
@@ -57,8 +63,9 @@ class Gameboy:
             #freeze_frames = [images[-1]] * int(1000/duration) # Freeze on last frame
             # print(len(freeze_frames))
             #print(f"Duration {duration}")
+            frames = [images[0]]*350 + images
             save_path = os.path.join(script_dir, "action.mp4")
-            clip = ImageSequenceClip(images, fps=fps)
+            clip = ImageSequenceClip(frames, fps=fps)
             clip.write_videofile(save_path, codec='libx264')
             if delete:
                 for img in images:
