@@ -143,7 +143,7 @@ class Bot:
                 top_result = max_result['title']
                 self.take_action(top_result)
 
-        self.gameboy.tick(300) # Progress the screen to the next position
+        self.gameboy.tick(900) # Progress the screen to the next position
         image = self.gameboy.screenshot()
         try:
             media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
@@ -153,10 +153,10 @@ class Bot:
 
         time.sleep(50)
         try:
-            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon", media_ids=[media['id']])
+            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo", media_ids=[media['id']])
         except:
             time.sleep(30)
-            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon", media_ids=[media['id']])
+            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gamebody #nintendo", media_ids=[media['id']])
 
         try:
             poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
@@ -194,7 +194,7 @@ class Bot:
                 action = buttons[inp.lower()]
                 #self.gameboy.tick()
                 action()
-                self.gameboy.tick(600)
+                self.gameboy.tick(1800)
             else:
                 print(f"No action defined for '{inp}'.")
             self.gameboy.save()
