@@ -121,6 +121,15 @@ class Bot:
         else:
             print(f"No action defined for '{result}'.")
 
+    def retry_mastodon_call(self, func, retries=5, interval=10, *args, **kwargs):
+        for _ in range(retries):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                print(f"Failure to execute {e}")
+                time.sleep(interval)
+        return False # Failed to execute
+
     def run(self):
         self.gameboy.load()
         post_id, poll_id = self.read_ids()
@@ -145,30 +154,38 @@ class Bot:
 
         self.gameboy.tick(900) # Progress the screen to the next position
         image = self.gameboy.screenshot()
-        try:
-            media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
-        except:
-            time.sleep(45)
-            media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
+        media = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=image, description='Screenshot of Pokemon Gold')
+        #try:
+        #    media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
+        #except:
+        #    time.sleep(45)
+        #    media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
+        #time.sleep(50)
+        post = self.retry_mastodon_call(self.mastodon.status_post, retries=5, interval=10, status=f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo", media_ids=[media['id']])
+        #try:
+        #    post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo", media_ids=[media['id']])
+        #except:
+        #    time.sleep(30)
+        #    post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gamebody #nintendo", media_ids=[media['id']])
+        poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'] )
 
-        time.sleep(50)
-        try:
-            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo", media_ids=[media['id']])
-        except:
-            time.sleep(30)
-            post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gamebody #nintendo", media_ids=[media['id']])
+        #ry:
+        #    poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
+        #except:
+        #    time.sleep(30)
+        #    poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
 
-        try:
-            poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
-        except:
-            time.sleep(30)
-            poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
+        self.retry_mastodon_call(self.pin_posts, retries=5, interval=10, post_id=post['id'], poll_id=poll['id'])
+        #try:
+        #    self.pin_posts(post['id'], poll['id'])
+        #except:
+        #    time.sleep(30)
+        #    self.pin_posts(post['id'], poll['id'])
 
-        try:
-            self.pin_posts(post['id'], poll['id'])
-        except:
-            time.sleep(30)
-            self.pin_posts(post['id'], poll['id'])
+        result = self.gameboy.build_gif("gif_images")
+        if result:
+            gif = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=result, description='Gif of pokemon gold movement')
+            self.retry_mastodon_call(self.mastodon.status_post, retries=10, interval=10, status="", media_ids=[gif['id']], in_reply_to_id=post['id'])
 
         self.save_ids(post['id'], poll['id'])
 
@@ -177,6 +194,7 @@ class Bot:
 
     def test(self):
         self.gameboy.load()
+        #self.gameboy.build_gif("gif_images")
         while True:
             inp = input("Action: ")
             buttons = {
@@ -194,10 +212,11 @@ class Bot:
                 action = buttons[inp.lower()]
                 #self.gameboy.tick()
                 action()
-                self.gameboy.tick(1800)
+                self.gameboy.tick(900)
             else:
                 print(f"No action defined for '{inp}'.")
             self.gameboy.save()
+            self.gameboy.build_gif("gif_images")
             #self.take_action(inp)
             #self.gameboy.tick(300)
 

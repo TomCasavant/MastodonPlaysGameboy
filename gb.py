@@ -4,6 +4,7 @@ import threading
 import os
 import re
 import shutil
+from PIL import Image
 
 class Gameboy:
 
@@ -28,9 +29,32 @@ class Gameboy:
         while True:
             self.random_button()
 
-    def tick(self, ticks=1):
+    def tick(self, ticks=1, gif=True):
         for tick in range(ticks):
+            if gif:
+                self.screenshot("gif_images")
             self.pyboy.tick()
+
+    def build_gif(self, image_path, delete=True, fps=60):
+        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        gif_dir = os.path.join(script_dir, image_path)
+        image_files = [i for i in os.listdir(gif_dir) if os.path.isfile(os.path.join(gif_dir, i))]
+        #image_files.sort()
+        image_files.sort(key=lambda x: int(''.join(filter(str.isdigit, x))))
+        images = []
+        for file in image_files:
+            with Image.open(os.path.join(gif_dir, file)) as img:
+                images.append(img.copy())
+            if delete:
+                os.remove(os.path.join(gif_dir, file))
+
+        if images:
+            duration = int(1000/fps)
+            freeze_frames = [images[-1]] * int(1500/duration)
+            save_path = os.path.join(script_dir, "action.gif")
+            images[0].save(save_path, save_all=True, append_images=images[1:]+freeze_frames, loop=0, duration=duration)
+            return save_path
+        return false
 
     def stop(self):
         self.running = False
@@ -101,9 +125,9 @@ class Gameboy:
         self.tick()
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_SELECT)
 
-    def screenshot(self):
+    def screenshot(self, path='screenshots'):
         script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
-        screenshot_dir = os.path.join(script_dir, 'screenshots')
+        screenshot_dir = os.path.join(script_dir, path)
         os.makedirs(screenshot_dir, exist_ok=True)  # Create screenshots directory if it doesn't exist
 
         # Get existing screenshot numbers
