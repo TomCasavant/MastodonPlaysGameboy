@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 from PIL import Image
+from moviepy.editor import ImageSequenceClip
 
 class Gameboy:
 
@@ -35,26 +36,37 @@ class Gameboy:
                 self.screenshot("gif_images")
             self.pyboy.tick()
 
-    def build_gif(self, image_path, delete=True, fps=60):
+    def build_gif(self, image_path, delete=True, fps=120):
         script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
         gif_dir = os.path.join(script_dir, image_path)
         image_files = [i for i in os.listdir(gif_dir) if os.path.isfile(os.path.join(gif_dir, i))]
         #image_files.sort()
         image_files.sort(key=lambda x: int(''.join(filter(str.isdigit, x))))
         images = []
+        print(len(image_files))
         for file in image_files:
-            with Image.open(os.path.join(gif_dir, file)) as img:
-                images.append(img.copy())
-            if delete:
-                os.remove(os.path.join(gif_dir, file))
+            images.append(os.path.join(gif_dir, file))
+            #with Image.open(os.path.join(gif_dir, file)) as img:
+            #    images.append(img.copy())
+            #if delete:
+            #    os.remove(os.path.join(gif_dir, file))
 
         if images:
+            print(len(images))
             duration = int(1000/fps)
-            freeze_frames = [images[-1]] * int(1500/duration)
-            save_path = os.path.join(script_dir, "action.gif")
-            images[0].save(save_path, save_all=True, append_images=images[1:]+freeze_frames, loop=0, duration=duration)
+            #freeze_frames = [images[-1]] * int(1000/duration) # Freeze on last frame
+            # print(len(freeze_frames))
+            #print(f"Duration {duration}")
+            save_path = os.path.join(script_dir, "action.mp4")
+            clip = ImageSequenceClip(images, fps=fps)
+            clip.write_videofile(save_path, codec='libx264')
+            if delete:
+                for img in images:
+                    os.remove(img)
+            #images[0].save(save_path, save_all=True, append_images=images[1:]+freeze_frames, interlace=False, loop=0, duration=duration, disposal=1)
             return save_path
-        return false
+
+        return False
 
     def stop(self):
         self.running = False
@@ -64,8 +76,7 @@ class Gameboy:
 
     def dpad_up(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_UP)
-        self.tick()
-        self.tick()
+        self.tick(4)
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_UP)
         #print(self.pyboy.stop())
         #self.tick()
@@ -73,56 +84,49 @@ class Gameboy:
     def dpad_down(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
         print("down")
-        self.tick()
-        self.tick()
+        self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_DOWN)
         #self.tick()
 
     def dpad_right(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_RIGHT)
         print("right")
-        self.tick()
-        self.tick()
+        self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_RIGHT)
         #self.tick()
 
     def dpad_left(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_LEFT)
         print("left")
-        self.tick()
-        self.tick()
+        self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_LEFT)
         #self.tick()
 
     def a(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_A)
         print("a")
-        self.tick()
-        self.tick()
+        self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_A)
         #self.tick()
 
     def b(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_B)
         print("b")
-        self.tick()
-        self.tick()
+        self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_B)
         #self.tick()
 
     def start(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_START)
         print("start")
-        self.tick()
-        self.tick()
+        self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_START)
         #self.tick()
 
     def select(self) -> None:
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_SELECT)
         print("select")
-        self.tick()
-        self.tick()
+        self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_SELECT)
 
     def screenshot(self, path='screenshots'):

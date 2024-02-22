@@ -184,8 +184,8 @@ class Bot:
 
         result = self.gameboy.build_gif("gif_images")
         if result:
-            gif = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=result, description='Gif of pokemon gold movement')
-            self.retry_mastodon_call(self.mastodon.status_post, retries=10, interval=10, status="", media_ids=[gif['id']], in_reply_to_id=post['id'])
+            gif = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=result, description='Video of pokemon gold movement')
+            self.retry_mastodon_call(self.mastodon.status_post, retries=10, interval=10, status="Action Clip", media_ids=[gif['id']], in_reply_to_id=poll['id'])
 
         self.save_ids(post['id'], poll['id'])
 
