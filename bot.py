@@ -9,8 +9,8 @@ class Bot:
 
     def __init__(self, config_path="config.toml"):
         # If config_path is not provided, use the config.toml file in the same directory as the script
-        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
-        config_path = os.path.join(script_dir, "config.toml")
+        self.script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        config_path = os.path.join(self.script_dir, "config.toml")
         with open(config_path, 'r') as config_file:
             self.config = toml.load(config_file)
             self.mastodon_config = self.config.get('mastodon', {})
@@ -18,7 +18,7 @@ class Bot:
 
         self.mastodon = self.login()
         print(self.gameboy_config.get('rom'))
-        rom = os.path.join(script_dir, self.gameboy_config.get('rom'))
+        rom = os.path.join(self.script_dir, self.gameboy_config.get('rom'))
         self.gameboy = Gameboy(rom, True)
 
     def simulate(self):
@@ -152,7 +152,14 @@ class Bot:
                 top_result = max_result['title']
                 self.take_action(top_result)
 
-        self.gameboy.tick(900) # Progress the screen to the next position
+        frames = self.gameboy.loop_until_stopped()
+        result = False
+        if frames > 71:
+            result = self.gameboy.build_gif("gif_images")
+        else:
+            gif_dir = os.path.join(self.script_dir, "gif_images")
+            self.gameboy.empty_directory(gif_dir)
+
         image = self.gameboy.screenshot()
         media = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=image, description='Screenshot of Pokemon Gold')
         #try:
@@ -182,7 +189,7 @@ class Bot:
         #    time.sleep(30)
         #    self.pin_posts(post['id'], poll['id'])
 
-        result = self.gameboy.build_gif("gif_images")
+        #result = self.gameboy.build_gif("gif_images")
         if result:
             gif = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=result, description='Video of pokemon gold movement')
             self.retry_mastodon_call(self.mastodon.status_post, retries=10, interval=10, status="Action Clip", media_ids=[gif['id']], in_reply_to_id=poll['id'])
@@ -212,11 +219,16 @@ class Bot:
                 action = buttons[inp.lower()]
                 #self.gameboy.tick()
                 action()
-                self.gameboy.tick(900)
+                frames = self.gameboy.loop_until_stopped()
+                if frames > 71:
+                    self.gameboy.build_gif("gif_images")
+                else:
+                    gif_dir = os.path.join(self.script_dir, "gif_images")
+                    self.gameboy.empty_directory(gif_dir)
             else:
                 print(f"No action defined for '{inp}'.")
             self.gameboy.save()
-            self.gameboy.build_gif("gif_images")
+            #self.gameboy.build_gif("gif_images")
             #self.take_action(inp)
             #self.gameboy.tick(300)
 
