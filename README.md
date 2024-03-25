@@ -8,6 +8,5 @@ Pokemon Gold version hosted at [@pokemon@tomkahe.com](https://tomkahe.com/@pokem
 
 
 ![image](https://github.com/TomCasavant/MastodonPlaysGameboy/assets/7014115/03751002-6b02-4610-bd17-d4997363f85d)
-![Follow @hongminhee@todon.eu](https://fedi-badge.deno.dev/@hongminhee@todon.eu/followers.svg)
 
 [![Follow @pokemon@tomkahe.com](https://fedi-badge.deno.dev/@pokemon@tomkahe.com/followers.svg?style=plastic)](https://tomkahe.com/@pokemon)
