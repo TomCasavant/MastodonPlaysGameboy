@@ -154,7 +154,7 @@ class Bot:
 
         frames = self.gameboy.loop_until_stopped()
         result = False
-        if frames > 71:
+        if frames >= 70:
             result = self.gameboy.build_gif("gif_images")
         else:
             gif_dir = os.path.join(self.script_dir, "gif_images")
@@ -162,19 +162,26 @@ class Bot:
 
         image = self.gameboy.screenshot()
         media = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=image, description='Screenshot of Pokemon Gold')
+        media_ids = []
+        try: # Probably add a check here if generating a gif is enabled (so we don't have to generate one every single hour?)
+            previous_frames = self.gameboy.get_recent_frames("screenshots", 25)
+            previous_media = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=previous_frames, description="Video of the previous 45 frames")
+            media_ids = [media['id'], previous_media['id']]
+        except:
+            media_ids = [media['id']]
         #try:
         #    media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
         #except:
         #    time.sleep(45)
         #    media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
         #time.sleep(50)
-        post = self.retry_mastodon_call(self.mastodon.status_post, retries=5, interval=10, status=f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo", media_ids=[media['id']])
+        post = self.retry_mastodon_call(self.mastodon.status_post, retries=5, interval=10, status=f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo #FediPlaysPokemon", media_ids=[media_ids])
         #try:
         #    post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo", media_ids=[media['id']])
         #except:
         #    time.sleep(30)
         #    post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gamebody #nintendo", media_ids=[media['id']])
-        poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'] )
+        poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:\n\n#FediPlaysPokemon", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'] )
 
         #ry:
         #    poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
@@ -190,9 +197,10 @@ class Bot:
         #    self.pin_posts(post['id'], poll['id'])
 
         #result = self.gameboy.build_gif("gif_images")
+        result = False
         if result:
             gif = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=result, description='Video of pokemon gold movement')
-            self.retry_mastodon_call(self.mastodon.status_post, retries=10, interval=10, status="Action Clip", media_ids=[gif['id']], in_reply_to_id=poll['id'])
+            self.retry_mastodon_call(self.mastodon.status_post, retries=10, interval=10, status="#Pokemon #FediPlaysPokemon", media_ids=[gif['id']], in_reply_to_id=poll['id'])
 
         self.save_ids(post['id'], poll['id'])
 
@@ -201,8 +209,9 @@ class Bot:
 
     def test(self):
         self.gameboy.load()
+        self.gameboy.get_recent_frames('screenshots', 25)
         #self.gameboy.build_gif("gif_images")
-        while True:
+        '''while True:
             inp = input("Action: ")
             buttons = {
                 "up": self.gameboy.dpad_up,
@@ -220,7 +229,7 @@ class Bot:
                 #self.gameboy.tick()
                 action()
                 frames = self.gameboy.loop_until_stopped()
-                if frames > 71:
+                if frames > 51:
                     self.gameboy.build_gif("gif_images")
                 else:
                     gif_dir = os.path.join(self.script_dir, "gif_images")
@@ -230,7 +239,7 @@ class Bot:
             self.gameboy.save()
             #self.gameboy.build_gif("gif_images")
             #self.take_action(inp)
-            #self.gameboy.tick(300)
+            #self.gameboy.tick(300)'''
 
 if __name__ == '__main__':
     bot = Bot()

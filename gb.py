@@ -47,12 +47,29 @@ class Gameboy:
         print(f"Pixels: {changed_pixels} {percent}%")
         return percent
 
+    def get_recent_frames(self, directory, num_frames=100):
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        screenshot_dir = os.path.join(script_dir, directory)
+        image_files = [os.path.join(screenshot_dir, i) for i in os.listdir(screenshot_dir)] # Probably should replace this with heap (especially since there are so many image files)
+        image_files.sort(key=os.path.getmtime)
+        latest = image_files[-(num_frames):]
+
+        count = 0
+        for image in latest:
+            print(image)
+            count+=1
+            shutil.copy(image, os.path.join(script_dir, 'tmp', f"{count}.png"))
+
+        self.build_gif(os.path.join(script_dir, 'tmp'), fps=5, output_name="test.mp4")
+        self.empty_directory(os.path.join(script_dir, 'tmp'))
+        return os.path.join(script_dir, 'test.mp4')
+
     def empty_directory(self, directory):
         image_files = [i for i in os.listdir(directory) if os.path.isfile(os.path.join(directory, i))]
         for img in image_files:
             os.remove(os.path.join(directory, img))
 
-    def build_gif(self, image_path, delete=True, fps=120):
+    def build_gif(self, image_path, delete=True, fps=120, output_name="action.mp4"):
         script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
         gif_dir = os.path.join(script_dir, image_path)
         image_files = [i for i in os.listdir(gif_dir) if os.path.isfile(os.path.join(gif_dir, i))]
@@ -64,7 +81,8 @@ class Gameboy:
         #diffs = []
         for file in image_files:
             #diffs.append(self.compare_frames(image1, Image.open(os.path.join(gif_dir, file)).convert('L')))
-            gameboy_outline = Image.open('gameboy.png').convert("RGB")
+            
+            gameboy_outline = Image.open(os.path.join(script_dir, 'gameboy.png')).convert("RGB")
             img = Image.open(os.path.join(gif_dir, file)).convert("RGB")
             img = img.resize((181, 163))
             combined = gameboy_outline.copy()
@@ -86,7 +104,7 @@ class Gameboy:
                 #print(f"Duration {duration}")
             #frames = [images[0]]*350 + images
             frames = images
-            save_path = os.path.join(script_dir, "action.mp4")
+            save_path = os.path.join(script_dir, output_name)
             clip = ImageSequenceClip(frames, fps=fps)
             clip.write_videofile(save_path, codec='libx264')
             if delete:
@@ -215,7 +233,7 @@ class Gameboy:
                     no_movement += 1
                 else:
                     no_movement = 0
-            if no_movement > 5:
+            if no_movement > 3:
                 running = False
             if count > 1000: # Shouldn't have lasted this long, something has gone wrong
                 print("Error")
