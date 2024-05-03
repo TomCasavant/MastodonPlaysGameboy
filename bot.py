@@ -161,7 +161,7 @@ class Bot:
             self.gameboy.empty_directory(gif_dir)
 
         image = self.gameboy.screenshot()
-        alt_text = 'Screenshot of ' + self.gameboy_config.get('title')
+        alt_text = 'Screenshot of ' + self.gameboy_config.get('title', 'a Game Boy game.')
         media = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=image, description=alt_text)
         media_ids = []
         try: # Probably add a check here if generating a gif is enabled (so we don't have to generate one every single hour?)
@@ -170,6 +170,8 @@ class Bot:
             media_ids = [media['id'], previous_media['id']]
         except:
             media_ids = [media['id']]
+
+        poll_duration = self.mastodon_config.get('poll_duration', 60)
         #try:
         #    media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
         #except:
@@ -185,8 +187,8 @@ class Bot:
         #    time.sleep(30)
         #    post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gamebody #nintendo", media_ids=[media['id']])
 
-        poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:\n\n#FediPlaysPokemon", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'] )
-        #poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:\n\nTest account", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️"], reply_id=post['id'] )
+        poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:\n\n#FediPlaysPokemon", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], expires_in=poll_duration*60, reply_id=post['id'] )
+        #poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:\n\nTest account", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️"], expires_in=poll_duration*60, reply_id=post['id'] )
 
         #ry:
         #    poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
