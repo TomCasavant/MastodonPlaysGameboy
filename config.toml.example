@@ -4,3 +4,6 @@ access_token = ""
 
 [gameboy]
 rom = "Pokemon - Gold Version.gbc"
+
+[post]
+title = "Pokémon Gold"
