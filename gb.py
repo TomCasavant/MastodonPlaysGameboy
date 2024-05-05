@@ -81,7 +81,11 @@ class Gameboy:
             count += 1
             shutil.copy(image, os.path.join(script_dir, "tmp", f"{count}.png"))
 
-        self.build_gif(os.path.join(script_dir, "tmp"), fps=5, output_name="test.mp4", gif_outline=gif_outline)
+        self.build_gif(os.path.join(script_dir, "tmp"),
+            fps=5,
+            output_name="test.mp4",
+            gif_outline=gif_outline
+        )
         self.empty_directory(os.path.join(script_dir, "tmp"))
         return os.path.join(script_dir, "test.mp4")
 

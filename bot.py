@@ -207,7 +207,10 @@ class Bot:
         # Probably add a check here if generating a gif is enabled (so we don't
         # have to generate one every single hour?)
         try:
-            previous_frames = self.gameboy.get_recent_frames("screenshots", 25, self.gameboy_config['gif_outline'])
+            previous_frames = self.gameboy.get_recent_frames("screenshots",
+                25,
+                self.gameboy_config['gif_outline']
+            )
             previous_media = self.retry_mastodon_call(
                 self.mastodon.media_post,
                 retries=5,
