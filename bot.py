@@ -197,10 +197,10 @@ class Bot:
         image = self.gameboy.screenshot()
         alt_text = 'Screenshot of ' + self.gameboy_config.get('title', 'a Game Boy game.')
         media = self.retry_mastodon_call(
-          self.mastodon.media_post, 
-          retries=5, 
-          interval=10, 
-          media_file=image, 
+          self.mastodon.media_post,
+          retries=5,
+          interval=10,
+          media_file=image,
           description=alt_text
         )
         media_ids = []
@@ -230,6 +230,8 @@ class Bot:
             media_ids=[media_ids],
         )
 
+        poll_duration = self.mastodon_config.get('poll_duration', 60)
+
         poll = self.retry_mastodon_call(
             self.post_poll,
             retries=5,
@@ -245,6 +247,7 @@ class Bot:
                 "Start",
                 "Select",
             ],
+            expires_in=poll_duration*60,
             reply_id=post["id"],
         )
 
