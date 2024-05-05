@@ -5,40 +5,43 @@ from mastodon import Mastodon
 import toml
 import os
 
+
 class Bot:
 
     def __init__(self, config_path="config.toml"):
-        # If config_path is not provided, use the config.toml file in the same directory as the script
-        self.script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        # If config_path is not provided, use the config.toml file in the same
+        # directory as the script
+        # Get the directory of the current script
+        self.script_dir = os.path.dirname(os.path.realpath(__file__))
         config_path = os.path.join(self.script_dir, "config.toml")
-        with open(config_path, 'r') as config_file:
+        with open(config_path, "r") as config_file:
             self.config = toml.load(config_file)
-            self.mastodon_config = self.config.get('mastodon', {})
-            self.gameboy_config = self.config.get('gameboy', {})
+            self.mastodon_config = self.config.get("mastodon", {})
+            self.gameboy_config = self.config.get("gameboy", {})
 
         self.mastodon = self.login()
-        print(self.gameboy_config.get('rom'))
-        rom = os.path.join(self.script_dir, self.gameboy_config.get('rom'))
+        print(self.gameboy_config.get("rom"))
+        rom = os.path.join(self.script_dir, self.gameboy_config.get("rom"))
         self.gameboy = Gameboy(rom, True)
 
     def simulate(self):
         while True:
-            #print(self.gameboy.is_running())
+            # print(self.gameboy.is_running())
             if True:
-                #self.gameboy.random_button()
+                # self.gameboy.random_button()
                 buttons = {
-                 "a" : self.gameboy.a,
-                 "b" : self.gameboy.b,
-                 "start" : self.gameboy.start,
-                 "select" : self.gameboy.select,
-                 "up" : self.gameboy.dpad_up,
-                 "down" : self.gameboy.dpad_down,
-                 "right" : self.gameboy.dpad_right,
-                 "left" : self.gameboy.dpad_left,
-                 "random" : self.gameboy.random_button,
-                 "tick" : "tick"
+                    "a": self.gameboy.a,
+                    "b": self.gameboy.b,
+                    "start": self.gameboy.start,
+                    "select": self.gameboy.select,
+                    "up": self.gameboy.dpad_up,
+                    "down": self.gameboy.dpad_down,
+                    "right": self.gameboy.dpad_right,
+                    "left": self.gameboy.dpad_left,
+                    "random": self.gameboy.random_button,
+                    "tick": "tick",
                 }
-                #self.gameboy.random_button()
+                # self.gameboy.random_button()
                 print(buttons)
                 press = input("Button: ")
                 if press == "tick":
@@ -47,18 +50,18 @@ class Bot:
                 else:
                     buttons[press]()
                     self.gameboy.pyboy.tick()
-                #time.sleep(1)
+                # time.sleep(1)
 
     def random_button(self):
         buttons = {
-             "a" : self.gameboy.a,
-             "b" : self.gameboy.b,
-             "start" : self.gameboy.start,
-             "select" : self.gameboy.select,
-             "up" : self.gameboy.dpad_up,
-             "down" : self.gameboy.dpad_down,
-             "right" : self.gameboy.dpad_right,
-             "left" : self.gameboy.dpad_left
+            "a": self.gameboy.a,
+            "b": self.gameboy.b,
+            "start": self.gameboy.start,
+            "select": self.gameboy.select,
+            "up": self.gameboy.dpad_up,
+            "down": self.gameboy.dpad_down,
+            "right": self.gameboy.dpad_right,
+            "left": self.gameboy.dpad_left,
         }
 
         random_button = random.choice(list(buttons.keys()))
@@ -66,30 +69,37 @@ class Bot:
         action()
         return random_button
 
-
     def login(self):
-        server = self.mastodon_config.get('server')
+        server = self.mastodon_config.get("server")
         print(f"Logging into {server}")
-        return Mastodon(access_token=self.mastodon_config.get('access_token'), api_base_url=server)
+        return Mastodon(
+            access_token=self.mastodon_config.get("access_token"), api_base_url=server
+        )
 
-    def post_poll(self, status, options, expires_in=60*60, reply_id=None):
-        poll = self.mastodon.make_poll(options, expires_in=expires_in, hide_totals=False)
-        return self.mastodon.status_post(status, in_reply_to_id=reply_id, language='en', poll=poll)
+    def post_poll(self, status, options, expires_in=60 * 60, reply_id=None):
+        poll = self.mastodon.make_poll(
+            options, expires_in=expires_in, hide_totals=False
+        )
+        return self.mastodon.status_post(
+            status, in_reply_to_id=reply_id, language="en", poll=poll
+        )
 
     def save_ids(self, post_id, poll_id):
-        script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+        # Get the directory of the current script
+        script_dir = os.path.dirname(os.path.realpath(__file__))
         ids_loc = os.path.join(script_dir, "ids.txt")
-        with open(ids_loc, 'w') as file:
+        with open(ids_loc, "w") as file:
             file.write(f"{post_id},{poll_id}")
 
     def read_ids(self):
         try:
-            script_dir = os.path.dirname(os.path.realpath(__file__))  # Get the directory of the current script
+            # Get the directory of the current script
+            script_dir = os.path.dirname(os.path.realpath(__file__))
             ids_loc = os.path.join(script_dir, "ids.txt")
-            with open(ids_loc, 'r') as file:
+            with open(ids_loc, "r") as file:
                 content = file.read()
                 if content:
-                    post_id, poll_id = content.split(',')
+                    post_id, poll_id = content.split(",")
                     return post_id, poll_id
         except FileNotFoundError:
             return None, None
@@ -111,7 +121,7 @@ class Bot:
             "🅰": self.gameboy.a,
             "🅱": self.gameboy.b,
             "start": self.gameboy.start,
-            "select": self.gameboy.select
+            "select": self.gameboy.select,
         }
         print(buttons)
         # Perform the corresponding action
@@ -128,7 +138,7 @@ class Bot:
             except Exception as e:
                 print(f"Failure to execute {e}")
                 time.sleep(interval)
-        return False # Failed to execute
+        return False  # Failed to execute
 
     def run(self):
         self.gameboy.load()
@@ -138,18 +148,18 @@ class Bot:
         if post_id:
             try:
                 self.unpin_posts(post_id, poll_id)
-            except:
+            except BaseException:
                 time.sleep(30)
                 self.unpin_posts(post_id, poll_id)
 
             poll_status = self.mastodon.status(poll_id)
-            poll_results = poll_status.poll['options']
-            max_result = max(poll_results, key=lambda x: x['votes_count'])
-            if (max_result['votes_count'] == 0):
+            poll_results = poll_status.poll["options"]
+            max_result = max(poll_results, key=lambda x: x["votes_count"])
+            if max_result["votes_count"] == 0:
                 button = self.random_button()
                 top_result = f"Random (no votes, chose {button})"
             else:
-                top_result = max_result['title']
+                top_result = max_result["title"]
                 self.take_action(top_result)
 
         frames = self.gameboy.loop_until_stopped()
@@ -161,57 +171,114 @@ class Bot:
             self.gameboy.empty_directory(gif_dir)
 
         image = self.gameboy.screenshot()
-        media = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=image, description='Screenshot of Pokemon Gold')
+        media = self.retry_mastodon_call(
+            self.mastodon.media_post,
+            retries=5,
+            interval=10,
+            media_file=image,
+            description="Screenshot of Pokemon Gold",
+        )
         media_ids = []
-        try: # Probably add a check here if generating a gif is enabled (so we don't have to generate one every single hour?)
+        # Probably add a check here if generating a gif is enabled (so we don't
+        # have to generate one every single hour?)
+        try:
             previous_frames = self.gameboy.get_recent_frames("screenshots", 25)
-            previous_media = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=previous_frames, description="Video of the previous 45 frames")
-            media_ids = [media['id'], previous_media['id']]
-        except:
-            media_ids = [media['id']]
-        #try:
+            previous_media = self.retry_mastodon_call(
+                self.mastodon.media_post,
+                retries=5,
+                interval=10,
+                media_file=previous_frames,
+                description="Video of the previous 45 frames",
+            )
+            media_ids = [media["id"], previous_media["id"]]
+        except BaseException:
+            media_ids = [media["id"]]
+        # try:
         #    media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
-        #except:
+        # except:
         #    time.sleep(45)
         #    media = self.mastodon.media_post(image, description='Screenshot of pokemon gold')
-        #time.sleep(50)
-        post = self.retry_mastodon_call(self.mastodon.status_post, retries=5, interval=10, status=f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo #FediPlaysPokemon", media_ids=[media_ids])
-        #try:
+        # time.sleep(50)
+        post = self.retry_mastodon_call(
+            self.mastodon.status_post,
+            retries=5,
+            interval=10,
+            status=f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo #FediPlaysPokemon",
+            media_ids=[media_ids],
+        )
+        # try:
         #    post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gameboy #nintendo", media_ids=[media['id']])
-        #except:
+        # except:
         #    time.sleep(30)
-        #    post = self.mastodon.status_post(f"Previous Action: {top_result}\n\n#pokemon #gamebody #nintendo", media_ids=[media['id']])
-        poll = self.retry_mastodon_call(self.post_poll, retries=5, interval=10, status="Vote on the next action:\n\n#FediPlaysPokemon", options=["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'] )
+        # post = self.mastodon.status_post(f"Previous Action:
+        # {top_result}\n\n#pokemon #gamebody #nintendo",
+        # media_ids=[media['id']])
+        poll = self.retry_mastodon_call(
+            self.post_poll,
+            retries=5,
+            interval=10,
+            status="Vote on the next action:\n\n#FediPlaysPokemon",
+            options=[
+                "Up ⬆️",
+                "Down ⬇️",
+                "Right ➡️ ",
+                "Left ⬅️",
+                "🅰",
+                "🅱",
+                "Start",
+                "Select",
+            ],
+            reply_id=post["id"],
+        )
 
-        #ry:
+        # ry:
         #    poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
-        #except:
+        # except:
         #    time.sleep(30)
         #    poll = self.post_poll("Vote on the next action:", ["Up ⬆️", "Down ⬇️", "Right ➡️ ", "Left ⬅️", "🅰", "🅱", "Start", "Select"], reply_id=post['id'])
 
-        self.retry_mastodon_call(self.pin_posts, retries=5, interval=10, post_id=post['id'], poll_id=poll['id'])
-        #try:
+        self.retry_mastodon_call(
+            self.pin_posts,
+            retries=5,
+            interval=10,
+            post_id=post["id"],
+            poll_id=poll["id"],
+        )
+        # try:
         #    self.pin_posts(post['id'], poll['id'])
-        #except:
+        # except:
         #    time.sleep(30)
         #    self.pin_posts(post['id'], poll['id'])
 
-        #result = self.gameboy.build_gif("gif_images")
+        # result = self.gameboy.build_gif("gif_images")
         result = False
         if result:
-            gif = self.retry_mastodon_call(self.mastodon.media_post, retries=5, interval=10, media_file=result, description='Video of pokemon gold movement')
-            self.retry_mastodon_call(self.mastodon.status_post, retries=10, interval=10, status="#Pokemon #FediPlaysPokemon", media_ids=[gif['id']], in_reply_to_id=poll['id'])
+            gif = self.retry_mastodon_call(
+                self.mastodon.media_post,
+                retries=5,
+                interval=10,
+                media_file=result,
+                description="Video of pokemon gold movement",
+            )
+            self.retry_mastodon_call(
+                self.mastodon.status_post,
+                retries=10,
+                interval=10,
+                status="#Pokemon #FediPlaysPokemon",
+                media_ids=[gif["id"]],
+                in_reply_to_id=poll["id"],
+            )
 
-        self.save_ids(post['id'], poll['id'])
+        self.save_ids(post["id"], poll["id"])
 
         # Save game state
         self.gameboy.save()
 
     def test(self):
         self.gameboy.load()
-        self.gameboy.get_recent_frames('screenshots', 25)
-        #self.gameboy.build_gif("gif_images")
-        '''while True:
+        self.gameboy.get_recent_frames("screenshots", 25)
+        # self.gameboy.build_gif("gif_images")
+        """while True:
             inp = input("Action: ")
             buttons = {
                 "up": self.gameboy.dpad_up,
@@ -239,14 +306,14 @@ class Bot:
             self.gameboy.save()
             #self.gameboy.build_gif("gif_images")
             #self.take_action(inp)
-            #self.gameboy.tick(300)'''
+            #self.gameboy.tick(300)"""
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     bot = Bot()
-    #bot.test()
+    # bot.test()
     bot.run()
     # for i in range(2):
     #    bot.run()
     #    time.sleep(60)
-    #bot.simulate()
-
+    # bot.simulate()
