@@ -1,12 +1,13 @@
-from pyboy import PyBoy, WindowEvent
-import random
-import threading
 import os
+import random
 import re
 import shutil
-from PIL import Image, ImageDraw
-from moviepy.editor import ImageSequenceClip
+import threading
+
 import numpy as np
+from moviepy.editor import ImageSequenceClip
+from PIL import Image, ImageDraw
+from pyboy import PyBoy, WindowEvent
 
 
 class Gameboy:

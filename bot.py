@@ -1,9 +1,11 @@
-from gb import Gameboy
+import os
 import random
 import time
-from mastodon import Mastodon
+
 import toml
-import os
+from mastodon import Mastodon
+
+from gb import Gameboy
 
 
 class Bot:
