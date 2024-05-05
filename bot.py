@@ -156,7 +156,7 @@ class Bot:
         for _ in range(retries):
             try:
                 return func(*args, **kwargs)
-            except RequestException as e:
+            except Exception as e:
                 print(f"Failure to execute {func.__name__}: {e}")
                 time.sleep(interval)
         return False  # Failed to execute
@@ -189,7 +189,7 @@ class Bot:
         frames = self.gameboy.loop_until_stopped()
         result = False
         if frames >= 70:
-            result = self.gameboy.build_gif("gif_images")
+            result = self.gameboy.build_gif("gif_images", self.gameboy_config['gif_outline'])
         else:
             gif_dir = os.path.join(self.script_dir, "gif_images")
             self.gameboy.empty_directory(gif_dir)
@@ -207,7 +207,7 @@ class Bot:
         # Probably add a check here if generating a gif is enabled (so we don't
         # have to generate one every single hour?)
         try:
-            previous_frames = self.gameboy.get_recent_frames("screenshots", 25)
+            previous_frames = self.gameboy.get_recent_frames("screenshots", 25, self.gameboy_config['gif_outline'])
             previous_media = self.retry_mastodon_call(
                 self.mastodon.media_post,
                 retries=5,
@@ -216,7 +216,8 @@ class Bot:
                 description="Video of the previous 45 frames",
             )
             media_ids = [media["id"], previous_media["id"]]
-        except BaseException:
+        except BaseException as e:
+            print(f"ERROR {e}")
             media_ids = [media["id"]]
 
         post = self.retry_mastodon_call(

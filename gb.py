@@ -63,7 +63,7 @@ class Gameboy:
         print(f"Pixels: {changed_pixels} {percent}%")
         return percent
 
-    def get_recent_frames(self, directory, num_frames=100):
+    def get_recent_frames(self, directory, num_frames=100, gif_outline='gameboy.png'):
         """Gets the most recent frames from a provided directory"""
         script_dir = os.path.dirname(os.path.realpath(__file__))
         screenshot_dir = os.path.join(script_dir, directory)
@@ -81,7 +81,7 @@ class Gameboy:
             count += 1
             shutil.copy(image, os.path.join(script_dir, "tmp", f"{count}.png"))
 
-        self.build_gif(os.path.join(script_dir, "tmp"), fps=5, output_name="test.mp4")
+        self.build_gif(os.path.join(script_dir, "tmp"), fps=5, output_name="test.mp4", gif_outline=gif_outline)
         self.empty_directory(os.path.join(script_dir, "tmp"))
         return os.path.join(script_dir, "test.mp4")
 
@@ -95,7 +95,7 @@ class Gameboy:
         for img in image_files:
             os.remove(os.path.join(directory, img))
 
-    def build_gif(self, image_path, delete=True, fps=120, output_name="action.mp4"):
+    def build_gif(self, image_path, delete=True, fps=120, output_name="action.mp4", gif_outline="gameboy.png"):
         """Build a gif from a folder of images"""
         # Get the directory of the current script
         script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -110,12 +110,12 @@ class Gameboy:
         for file in image_files:
 
             gameboy_outline = Image.open(
-                os.path.join(script_dir, "gameboy.png")
+                os.path.join(script_dir, gif_outline)
             ).convert("RGB")
             img = Image.open(os.path.join(gif_dir, file)).convert("RGB")
-            img = img.resize((181, 163))
+            img = img.resize((184, 170))
             combined = gameboy_outline.copy()
-            combined.paste(img, (165, 151))
+            combined.paste(img, (159, 138)) #338, 308
             combined.save(os.path.join(gif_dir, file))
             images.append(os.path.join(gif_dir, file))
 
