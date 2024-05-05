@@ -195,12 +195,13 @@ class Bot:
             self.gameboy.empty_directory(gif_dir)
 
         image = self.gameboy.screenshot()
+        alt_text = 'Screenshot of ' + self.gameboy_config.get('title', 'a Game Boy game.')
         media = self.retry_mastodon_call(
-            self.mastodon.media_post,
-            retries=5,
-            interval=10,
-            media_file=image,
-            description="Screenshot of Pokemon Gold",
+          self.mastodon.media_post,
+          retries=5,
+          interval=10,
+          media_file=image,
+          description=alt_text
         )
         media_ids = []
         # Probably add a check here if generating a gif is enabled (so we don't
@@ -229,6 +230,8 @@ class Bot:
             media_ids=[media_ids],
         )
 
+        poll_duration = self.mastodon_config.get('poll_duration', 60)
+
         poll = self.retry_mastodon_call(
             self.post_poll,
             retries=5,
@@ -244,6 +247,7 @@ class Bot:
                 "Start",
                 "Select",
             ],
+            expires_in=poll_duration*60,
             reply_id=post["id"],
         )
 
@@ -254,7 +258,6 @@ class Bot:
             post_id=post["id"],
             poll_id=poll["id"],
         )
-
         result = False
         if result:
             gif = self.retry_mastodon_call(

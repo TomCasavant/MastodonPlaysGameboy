@@ -1,6 +1,8 @@
 [mastodon]
 server = "https://tomkahe.com"
 access_token = ""
+poll_duration = 60
 
 [gameboy]
 rom = "Pokemon - Gold Version.gbc"
+title = "Pokémon Gold"
