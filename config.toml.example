@@ -7,3 +7,7 @@ poll_duration = 60
 rom = "Pokemon - Gold Version.gbc"
 title = "Pokémon Gold"
 gif_outline="gameboy.png"
+# Modes:
+# "generic": Default mode, no game-specific messages
+# "gs": Adds messages with player info for Pokémon Gold/Silver Versions. May not be compatible with Crystal.
+mode = "generic"
