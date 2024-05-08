@@ -11,3 +11,8 @@ gif_outline="gameboy.png"
 # "generic": Default mode, no game-specific messages
 # "gs": Adds messages with player info for Pokémon Gold/Silver Versions. May not be compatible with Crystal.
 mode = "generic"
+
+[debug]
+# Limit what buttons can be pressed. Accepts "full" (default), "directions", or "buttons".
+# Mostly used to test on servers with only 4 options allowed per poll.
+poll_options = "full"

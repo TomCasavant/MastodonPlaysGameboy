@@ -28,6 +28,7 @@ class Bot:
             self.config = toml.load(config_file)
             self.mastodon_config = self.config.get("mastodon", {})
             self.gameboy_config = self.config.get("gameboy", {})
+            self.debug_config = self.config.get("debug", {})
 
         self.mastodon = self.login()
         print(self.gameboy_config.get("rom"))
@@ -236,21 +237,38 @@ class Bot:
 
         poll_duration = self.mastodon_config.get('poll_duration', 60)
 
+        poll_options = [
+            "Up ⬆️",
+            "Down ⬇️",
+            "Right ➡️ ",
+            "Left ⬅️",
+            "🅰",
+            "🅱",
+            "Start",
+            "Select",
+        ]
+
+        if self.debug_config.get("poll_options", "full") == "directions":
+            poll_options = [
+                "Up ⬆️",
+                "Down ⬇️",
+                "Right ➡️ ",
+                "Left ⬅️"
+            ]
+        elif self.debug_config.get("poll_options", "full") == "buttons":
+            poll_options = [
+                "🅰",
+                "🅱",
+                "Start",
+                "Select",
+            ]
+
         poll = self.retry_mastodon_call(
             self.post_poll,
             retries=5,
             interval=10,
             status="Vote on the next action:\n\n#FediPlaysPokemon",
-            options=[
-                "Up ⬆️",
-                "Down ⬇️",
-                "Right ➡️ ",
-                "Left ⬅️",
-                "🅰",
-                "🅱",
-                "Start",
-                "Select",
-            ],
+            options=poll_options,
             expires_in=poll_duration*60,
             reply_id=post["id"],
         )
