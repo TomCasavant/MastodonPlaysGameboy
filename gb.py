@@ -117,9 +117,9 @@ class Gameboy:
                 os.path.join(script_dir, gif_outline)
             ).convert("RGB")
             img = Image.open(os.path.join(gif_dir, file)).convert("RGB")
-            img = img.resize((184, 170))
+            img = img.resize((822, 733))
             combined = gameboy_outline.copy()
-            combined.paste(img, (159, 138)) #338, 308
+            combined.paste(img, (370, 319)) #370, 319 1192, 1052    
             combined.save(os.path.join(gif_dir, file))
             images.append(os.path.join(gif_dir, file))
 
