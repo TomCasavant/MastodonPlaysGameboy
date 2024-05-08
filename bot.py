@@ -229,8 +229,8 @@ class Bot:
             retries=5,
             interval=10,
             status=(
-                f"Previous Action: {top_result}\n\n"
-                "#pokemon #gameboy #nintendo #FediPlaysPokemon"
+                f"Previous Action: {top_result}\n\n" +
+                self.mastodon_config.get("screenshot_status", "")
             ),
             media_ids=[media_ids],
         )
@@ -267,7 +267,8 @@ class Bot:
             self.post_poll,
             retries=5,
             interval=10,
-            status="Vote on the next action:\n\n#FediPlaysPokemon",
+            status="Vote on the next action:\n\n" +
+                   self.mastodon_config.get("poll_status", ""),
             options=poll_options,
             expires_in=poll_duration*60,
             reply_id=post["id"],
