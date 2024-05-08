@@ -83,11 +83,11 @@ class Gameboy:
 
         self.build_gif(os.path.join(script_dir, "tmp"),
             fps=5,
-            output_name="test.mp4",
+            output_name="previous.webm",
             gif_outline=gif_outline
         )
         self.empty_directory(os.path.join(script_dir, "tmp"))
-        return os.path.join(script_dir, "test.mp4")
+        return os.path.join(script_dir, "previous.webm")
 
     def empty_directory(self, directory):
         """Deletes all images in the provided directory"""
@@ -99,7 +99,7 @@ class Gameboy:
         for img in image_files:
             os.remove(os.path.join(directory, img))
 
-    def build_gif(self, image_path, delete=True, fps=120, output_name="action.mp4", gif_outline="gameboy.png"):
+    def build_gif(self, image_path, delete=True, fps=120, output_name="action.webm", gif_outline="gameboy.png"):
         """Build a gif from a folder of images"""
         # Get the directory of the current script
         script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -115,8 +115,8 @@ class Gameboy:
 
             gameboy_outline = Image.open(
                 os.path.join(script_dir, gif_outline)
-            ).convert("RGB")
-            img = Image.open(os.path.join(gif_dir, file)).convert("RGB")
+            ).convert("RGBA")
+            img = Image.open(os.path.join(gif_dir, file)).convert("RGBA")
             img = img.resize((822, 733))
             combined = gameboy_outline.copy()
             combined.paste(img, (370, 319)) #370, 319 1192, 1052    
@@ -128,7 +128,7 @@ class Gameboy:
             frames = images
             save_path = os.path.join(script_dir, output_name)
             clip = ImageSequenceClip(frames, fps=fps)
-            clip.write_videofile(save_path, codec="libx264")
+            clip.write_videofile(save_path, codec="libvpx")
             if delete:
                 for img in images:
                     os.remove(img)
