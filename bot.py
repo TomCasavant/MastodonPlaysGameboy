@@ -166,7 +166,7 @@ class Bot:
         """
         Runs the main gameplay, reads mastodon poll result, takes action, generates new posts
         """
-        self.gameboy.load()
+        self.gameboy.load(self.gameboy_config.get("save_state_path", "save.state"))
         post_id, poll_id = self.read_ids()
         top_result = None
 
@@ -302,11 +302,11 @@ class Bot:
         self.save_ids(post["id"], poll["id"])
 
         # Save game state
-        self.gameboy.save()
+        self.gameboy.save(self.gameboy_config.get("save_state_path", "save.state"))
 
     def test(self):
         """Method used for testing"""
-        self.gameboy.load()
+        self.gameboy.load(self.gameboy_config.get("save_state_path", "save.state"))
         self.gameboy.get_recent_frames("screenshots", 25)
         # self.gameboy.build_gif("gif_images")
         while True:
@@ -334,7 +334,7 @@ class Bot:
                     self.gameboy.empty_directory(gif_dir)
             else:
                 print(f"No action defined for '{inp}'.")
-            self.gameboy.save()
+            self.gameboy.save(self.gameboy_config.get("save_state_path", "save.state"))
             # self.gameboy.build_gif("gif_images")
             # self.take_action(inp)
             # self.gameboy.tick(300)

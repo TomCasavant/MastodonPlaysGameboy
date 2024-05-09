@@ -251,11 +251,11 @@ class Gameboy:
         )
         button()
 
-    def load(self):
+    def load(self, state):
         """Loads the save state"""
         # Get the directory of the current script
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        save_loc = os.path.join(script_dir, "save.state")
+        save_loc = os.path.join(script_dir, state)
         result = False
         if os.path.exists(save_loc):
             with open(save_loc, "rb") as file:
@@ -265,11 +265,11 @@ class Gameboy:
             print("Save state does not exist")
         return result
 
-    def save(self):
+    def save(self, state):
         """Saves current state to a file"""
         # Get the directory of the current script
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        save_loc = os.path.join(script_dir, "save.state")
+        save_loc = os.path.join(script_dir, state)
 
         with open(save_loc, "wb") as file:
             self.pyboy.save_state(file)
