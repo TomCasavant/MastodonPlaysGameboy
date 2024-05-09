@@ -28,6 +28,7 @@ class Bot:
             self.config = toml.load(config_file)
             self.mastodon_config = self.config.get("mastodon", {})
             self.gameboy_config = self.config.get("gameboy", {})
+            self.debug_config = self.config.get("debug", {})
 
         self.mastodon = self.login()
         print(self.gameboy_config.get("rom"))
@@ -165,7 +166,7 @@ class Bot:
         """
         Runs the main gameplay, reads mastodon poll result, takes action, generates new posts
         """
-        self.gameboy.load()
+        self.gameboy.load(self.gameboy_config.get("save_state_path", "save.state"))
         post_id, poll_id = self.read_ids()
         top_result = None
 
@@ -228,29 +229,47 @@ class Bot:
             retries=5,
             interval=10,
             status=(
-                f"Previous Action: {top_result}\n\n"
-                "#pokemon #gameboy #nintendo #FediPlaysPokemon"
+                f"Previous Action: {top_result}\n\n" +
+                self.mastodon_config.get("screenshot_status", "")
             ),
             media_ids=[media_ids],
         )
 
         poll_duration = self.mastodon_config.get('poll_duration', 60)
 
-        poll = self.retry_mastodon_call(
-            self.post_poll,
-            retries=5,
-            interval=10,
-            status="Vote on the next action:\n\n#FediPlaysPokemon",
-            options=[
+        poll_options = [
+            "Up ⬆️",
+            "Down ⬇️",
+            "Right ➡️ ",
+            "Left ⬅️",
+            "🅰",
+            "🅱",
+            "Start",
+            "Select",
+        ]
+
+        if self.debug_config.get("poll_options", "full") == "directions":
+            poll_options = [
                 "Up ⬆️",
                 "Down ⬇️",
                 "Right ➡️ ",
-                "Left ⬅️",
+                "Left ⬅️"
+            ]
+        elif self.debug_config.get("poll_options", "full") == "buttons":
+            poll_options = [
                 "🅰",
                 "🅱",
                 "Start",
                 "Select",
-            ],
+            ]
+
+        poll = self.retry_mastodon_call(
+            self.post_poll,
+            retries=5,
+            interval=10,
+            status="Vote on the next action:\n\n" +
+                   self.mastodon_config.get("poll_status", ""),
+            options=poll_options,
             expires_in=poll_duration*60,
             reply_id=post["id"],
         )
@@ -283,11 +302,11 @@ class Bot:
         self.save_ids(post["id"], poll["id"])
 
         # Save game state
-        self.gameboy.save()
+        self.gameboy.save(self.gameboy_config.get("save_state_path", "save.state"))
 
     def test(self):
         """Method used for testing"""
-        self.gameboy.load()
+        self.gameboy.load(self.gameboy_config.get("save_state_path", "save.state"))
         self.gameboy.get_recent_frames("screenshots", 25)
         # self.gameboy.build_gif("gif_images")
         while True:
@@ -315,7 +334,7 @@ class Bot:
                     self.gameboy.empty_directory(gif_dir)
             else:
                 print(f"No action defined for '{inp}'.")
-            self.gameboy.save()
+            self.gameboy.save(self.gameboy_config.get("save_state_path", "save.state"))
             # self.gameboy.build_gif("gif_images")
             # self.take_action(inp)
             # self.gameboy.tick(300)
