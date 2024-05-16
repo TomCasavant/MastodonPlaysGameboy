@@ -10,7 +10,7 @@ import shutil
 import numpy as np
 from moviepy.editor import ImageSequenceClip
 from PIL import Image
-from pyboy import PyBoy, WindowEvent
+from pyboy import PyBoy
 
 
 class Gameboy:
@@ -144,72 +144,41 @@ class Gameboy:
         """Loads the rom into a pyboy object"""
         return PyBoy(
             rom,
-            window_type="SDL2" if self.debug else "headless",
-            window_scale=3,
+            window="SDL2" if self.debug else "null",
             debug=False,
-            game_wrapper=True,
         )
 
     def dpad_up(self) -> None:
         """Presses up on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_ARROW_UP)
-        self.tick(4)
-        self.pyboy.send_input(WindowEvent.RELEASE_ARROW_UP)
+        self.pyboy.button('up', 3)
 
     def dpad_down(self) -> None:
         """Presses down on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
-        print("down")
-        self.tick(3)
-        self.pyboy.send_input(WindowEvent.RELEASE_ARROW_DOWN)
-        # self.tick()
+        self.pyboy.button('down', 3)
 
     def dpad_right(self) -> None:
         """Presses right on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_ARROW_RIGHT)
-        print("right")
-        self.tick(3)
-        self.pyboy.send_input(WindowEvent.RELEASE_ARROW_RIGHT)
-        # self.tick()
+        self.pyboy.button('right', 3)
 
     def dpad_left(self) -> None:
         """Presses left on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_ARROW_LEFT)
-        print("left")
-        self.tick(3)
-        self.pyboy.send_input(WindowEvent.RELEASE_ARROW_LEFT)
-        # self.tick()
+        self.pyboy.button('left', 3)
 
     def a(self) -> None:
         """Presses a on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_BUTTON_A)
-        print("a")
-        self.tick(3)
-        self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_A)
-        # self.tick()
+        self.pyboy.button('a', 3)
 
     def b(self) -> None:
         """Presses b on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_BUTTON_B)
-        print("b")
-        self.tick(3)
-        self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_B)
-        # self.tick()
+        self.pyboy.button('b', 3)
 
     def start(self) -> None:
         """Presses start on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_BUTTON_START)
-        print("start")
-        self.tick(3)
-        self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_START)
-        # self.tick()
+        self.pyboy.button('start', 3)
 
     def select(self) -> None:
         """Presses select on the gameboy"""
-        self.pyboy.send_input(WindowEvent.PRESS_BUTTON_SELECT)
-        print("select")
-        self.tick(3)
-        self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_SELECT)
+        self.pyboy.button('select', 3)
 
     def screenshot(self, path="screenshots"):
         """Takes a screenshot of gameboy screen and saves it to the path"""
@@ -230,7 +199,7 @@ class Gameboy:
         # Save the screenshot with the next available number
         screenshot_path = os.path.join(screenshot_dir, f"screenshot_{next_number}.png")
         screenshot_path_full = os.path.join(script_dir, "screenshot.png")
-        self.pyboy.screen_image().save(screenshot_path_full)
+        self.pyboy.screen.image.save(screenshot_path_full)
         # Copy the screenshot to the screenshots directory
         shutil.copyfile(screenshot_path_full, screenshot_path)
         return screenshot_path_full
