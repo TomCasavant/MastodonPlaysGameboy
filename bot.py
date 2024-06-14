@@ -13,6 +13,10 @@ from requests.exceptions import RequestException
 from gb import Gameboy
 
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
+ids_loc = os.path.join(script_dir, "ids.txt")
+gif_dir = os.path.join(script_dir, "gif_images")
+
 class Bot:
     """
     A Mastodon-API Compatible bot that handles gameboy gameplay through polls
@@ -21,9 +25,7 @@ class Bot:
     def __init__(self, config_path="config.toml"):
         # If config_path is not provided, use the config.toml file in the same
         # directory as the script
-        # Get the directory of the current script
-        self.script_dir = os.path.dirname(os.path.realpath(__file__))
-        config_path = os.path.join(self.script_dir, "config.toml")
+        config_path = os.path.join(script_dir, "config.toml")
         with open(config_path, "r", encoding="utf-8") as config_file:
             self.config = toml.load(config_file)
             self.mastodon_config = self.config.get("mastodon", {})
@@ -31,7 +33,7 @@ class Bot:
 
         self.mastodon = self.login()
         print(self.gameboy_config.get("rom"))
-        rom = os.path.join(self.script_dir, self.gameboy_config.get("rom"))
+        rom = os.path.join(script_dir, self.gameboy_config.get("rom"))
         self.gameboy = Gameboy(rom, True)
 
     def simulate(self):
@@ -99,18 +101,12 @@ class Bot:
 
     def save_ids(self, post_id, poll_id):
         """Saves post IDs to a text file"""
-        # Get the directory of the current script
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-        ids_loc = os.path.join(script_dir, "ids.txt")
         with open(ids_loc, "w", encoding="utf-8") as file:
             file.write(f"{post_id},{poll_id}")
 
     def read_ids(self):
         """Reads IDs from the text file"""
         try:
-            # Get the directory of the current script
-            script_dir = os.path.dirname(os.path.realpath(__file__))
-            ids_loc = os.path.join(script_dir, "ids.txt")
             with open(ids_loc, "r", encoding="utf-8") as file:
                 content = file.read()
                 if content:
@@ -191,7 +187,6 @@ class Bot:
         if frames >= 70:
             result = self.gameboy.build_gif("gif_images", self.gameboy_config['gif_outline'])
         else:
-            gif_dir = os.path.join(self.script_dir, "gif_images")
             self.gameboy.empty_directory(gif_dir)
 
         image = self.gameboy.screenshot()
@@ -311,7 +306,6 @@ class Bot:
                 if frames > 51:
                     self.gameboy.build_gif("gif_images")
                 else:
-                    gif_dir = os.path.join(self.script_dir, "gif_images")
                     self.gameboy.empty_directory(gif_dir)
             else:
                 print(f"No action defined for '{inp}'.")
