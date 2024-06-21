@@ -13,6 +13,9 @@ from PIL import Image
 from pyboy import PyBoy, WindowEvent
 
 
+script_dir = os.path.dirname(os.path.realpath(__file__))
+save_loc = os.path.join(script_dir, "save.state")
+
 class Gameboy:
     """Provides an easy way to interface with pyboy
 
@@ -65,7 +68,6 @@ class Gameboy:
 
     def get_recent_frames(self, directory, num_frames=100, gif_outline='gameboy.png'):
         """Gets the most recent frames from a provided directory"""
-        script_dir = os.path.dirname(os.path.realpath(__file__))
         screenshot_dir = os.path.join(script_dir, directory)
         # Probably should replace this with heap (especially since there are so
         # many image files)
@@ -101,8 +103,6 @@ class Gameboy:
 
     def build_gif(self, image_path, delete=True, fps=120, output_name="action.mp4", gif_outline="gameboy.png"):
         """Build a gif from a folder of images"""
-        # Get the directory of the current script
-        script_dir = os.path.dirname(os.path.realpath(__file__))
         gif_dir = os.path.join(script_dir, image_path)
         image_files = [
             i for i in os.listdir(gif_dir) if os.path.isfile(os.path.join(gif_dir, i))
@@ -213,8 +213,6 @@ class Gameboy:
 
     def screenshot(self, path="screenshots"):
         """Takes a screenshot of gameboy screen and saves it to the path"""
-        # Get the directory of the current script
-        script_dir = os.path.dirname(os.path.realpath(__file__))
         screenshot_dir = os.path.join(script_dir, path)
         # Create screenshots directory if it doesn't exist
         os.makedirs(screenshot_dir, exist_ok=True)
@@ -253,9 +251,6 @@ class Gameboy:
 
     def load(self):
         """Loads the save state"""
-        # Get the directory of the current script
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-        save_loc = os.path.join(script_dir, "save.state")
         result = False
         if os.path.exists(save_loc):
             with open(save_loc, "rb") as file:
@@ -267,16 +262,11 @@ class Gameboy:
 
     def save(self):
         """Saves current state to a file"""
-        # Get the directory of the current script
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-        save_loc = os.path.join(script_dir, "save.state")
-
         with open(save_loc, "wb") as file:
             self.pyboy.save_state(file)
 
     def loop_until_stopped(self, threshold=1):
         """Simulates the gameboy bot"""
-        script_dir = os.path.dirname(os.path.realpath(__file__))
         running = True
         previous_frame = None
         current_frame = None
