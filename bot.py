@@ -157,6 +157,25 @@ class Bot:
                 time.sleep(interval)
         return False  # Failed to execute
 
+    def strip_emoji(result):
+        match result.lower():
+            case "up ⬆️":
+                return "up"
+            case "down ⬇️":
+                return "down"
+            case "left ⬅️":
+                return "left"
+            case "right ➡️":
+                return "right"
+            case "🅰":
+                return "a"
+            case "🅱":
+                return "b"
+            case "start":
+                return "start"
+            case "select":
+                return "select"
+
     def run(self):
         """
         Runs the main gameplay, reads mastodon poll result, takes action, generates new posts
@@ -174,13 +193,19 @@ class Bot:
 
             poll_status = self.mastodon.status(poll_id)
             poll_results = poll_status.poll["options"]
-            max_result = max(poll_results, key=lambda x: x["votes_count"])
-            if max_result["votes_count"] == 0:
+            max_votes = max(map(lambda x: x["votes_count"], poll_results))
+            if max_votes == 0:
                 button = self.random_button()
                 top_result = f"Random (no votes, chose {button})"
             else:
-                top_result = max_result["title"]
-                self.take_action(top_result)
+                top_results = [x for x in poll_results if x["votes_count"] == max_votes]
+                if len(top_results) > 1:
+                    top_result = random.choice(top_results)["title"]
+                    self.take_action(top_result)
+                    top_result = f"Random (tie vote, chose {self.strip_emoji(top_result)})"
+                else:
+                    top_result = top_results[0]["title"]
+                    self.take_action(top_result)
 
         frames = self.gameboy.loop_until_stopped()
         result = False
