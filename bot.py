@@ -1,5 +1,5 @@
 """
-    A bot that interacts with a Mastodon compatible API, plays gameboy games via a Poll
+    A bot that interacts with a Mastodon compatible API, plays Game Boy games via a poll
 """
 
 import os
@@ -10,7 +10,7 @@ import toml
 from mastodon import Mastodon
 from requests.exceptions import RequestException
 
-from gb import Gameboy
+from gb import GameBoy
 
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -19,7 +19,7 @@ gif_dir = os.path.join(script_dir, "gif_images")
 
 class Bot:
     """
-    A Mastodon-API Compatible bot that handles gameboy gameplay through polls
+    A Mastodon-API compatible bot that handles Game Boy gameplay through polls
     """
 
     def __init__(self, config_path="config.toml"):
@@ -29,61 +29,43 @@ class Bot:
         with open(config_path, "r", encoding="utf-8") as config_file:
             self.config = toml.load(config_file)
             self.mastodon_config = self.config.get("mastodon", {})
-            self.gameboy_config = self.config.get("gameboy", {})
+            self.game_boy_config = self.config.get("gameboy", {})
 
         self.mastodon = self.login()
-        print(self.gameboy_config.get("rom"))
-        rom = os.path.join(script_dir, self.gameboy_config.get("rom"))
-        self.gameboy = Gameboy(rom, True)
+        print(self.game_boy_config.get("rom"))
+        rom = os.path.join(script_dir, self.game_boy_config.get("rom"))
+        self.game_boy = GameBoy(rom, True)
 
     def simulate(self):
-        """Simulates gameboy actions by pressing random buttons, useful for testing"""
+        """Simulates Game Boy actions by pressing random buttons, useful for testing"""
         while True:
-            # print(self.gameboy.is_running())
-            # self.gameboy.random_button()
+            # print(self.game_boy.is_running())
+            # self.game_boy.random_button()
             buttons = {
-                "a": self.gameboy.a,
-                "b": self.gameboy.b,
-                "start": self.gameboy.start,
-                "select": self.gameboy.select,
-                "up": self.gameboy.dpad_up,
-                "down": self.gameboy.dpad_down,
-                "right": self.gameboy.dpad_right,
-                "left": self.gameboy.dpad_left,
-                "random": self.gameboy.random_button,
+                "a": self.game_boy.a,
+                "b": self.game_boy.b,
+                "start": self.game_boy.start,
+                "select": self.game_boy.select,
+                "up": self.game_boy.dpad_up,
+                "down": self.game_boy.dpad_down,
+                "right": self.game_boy.dpad_right,
+                "left": self.game_boy.dpad_left,
+                "random": self.game_boy.random_button,
                 "tick": "tick",
             }
-            # self.gameboy.random_button()
+            # self.game_boy.random_button()
             print(buttons)
             press = input("Button: ")
             if press == "tick":
                 for _ in range(60):
-                    self.gameboy.pyboy.tick()
+                    self.game_boy.pyboy.tick()
             else:
                 buttons[press]()
-                self.gameboy.pyboy.tick()
+                self.game_boy.pyboy.tick()
             # time.sleep(1)
 
-    def random_button(self):
-        """Chooses a random button and presses it on the gameboy"""
-        buttons = {
-            "a": self.gameboy.a,
-            "b": self.gameboy.b,
-            "start": self.gameboy.start,
-            "select": self.gameboy.select,
-            "up": self.gameboy.dpad_up,
-            "down": self.gameboy.dpad_down,
-            "right": self.gameboy.dpad_right,
-            "left": self.gameboy.dpad_left,
-        }
-
-        random_button = random.choice(list(buttons.keys()))
-        action = buttons[random_button]
-        action()
-        return random_button
-
     def login(self):
-        """Logs into the mastodon server using config credentials"""
+        """Logs into the Mastodon server using config credentials"""
         server = self.mastodon_config.get("server")
         print(f"Logging into {server}")
         return Mastodon(
@@ -128,27 +110,34 @@ class Bot:
         self.mastodon.status_unpin(poll_id)
 
     def take_action(self, result):
-        """Presses button on gameboy based on poll result"""
+        """Presses button on Game Boy based on poll result"""
         buttons = {
-            "up ⬆️": self.gameboy.dpad_up,
-            "down ⬇️": self.gameboy.dpad_down,
-            "right ➡️": self.gameboy.dpad_right,
-            "left ⬅️": self.gameboy.dpad_left,
-            "🅰": self.gameboy.a,
-            "🅱": self.gameboy.b,
-            "start": self.gameboy.start,
-            "select": self.gameboy.select,
+            "Up ⬆️": self.game_boy.dpad_up,
+            "Down ⬇️": self.game_boy.dpad_down,
+            "Right ➡️": self.game_boy.dpad_right,
+            "Left ⬅️": self.game_boy.dpad_left,
+            "🅰": self.game_boy.a,
+            "🅱": self.game_boy.b,
+            "Start": self.game_boy.start,
+            "Select": self.game_boy.select,
         }
         print(buttons)
         # Perform the corresponding action
-        if result.lower() in buttons:
-            action = buttons[result.lower()]
+        if result in buttons:
+            action = buttons[result]
             action()
+            return result
+        elif result == "random":
+            random_button = random.choice(list(buttons.keys()))
+            action = buttons[random_button]
+            action()
+            return random_button
         else:
             print(f"No action defined for '{result}'.")
+            return "INVALID BUTTON"
 
     def retry_mastodon_call(self, func, *args, retries=5, interval=10, **kwargs):
-        """Continuously retries mastodon call, useful for servers with timeout issues"""
+        """Continuously retries Mastodon call, useful for servers with timeout issues"""
         for _ in range(retries):
             try:
                 return func(*args, **kwargs)
@@ -157,30 +146,11 @@ class Bot:
                 time.sleep(interval)
         return False  # Failed to execute
 
-    def strip_emoji(result):
-        match result.lower():
-            case "up ⬆️":
-                return "up"
-            case "down ⬇️":
-                return "down"
-            case "left ⬅️":
-                return "left"
-            case "right ➡️":
-                return "right"
-            case "🅰":
-                return "a"
-            case "🅱":
-                return "b"
-            case "start":
-                return "start"
-            case "select":
-                return "select"
-
     def run(self):
         """
-        Runs the main gameplay, reads mastodon poll result, takes action, generates new posts
+        Runs the main gameplay, reads Mastodon poll result, takes action, generates new posts
         """
-        self.gameboy.load()
+        self.game_boy.load()
         post_id, poll_id = self.read_ids()
         top_result = None
 
@@ -195,27 +165,27 @@ class Bot:
             poll_results = poll_status.poll["options"]
             max_votes = max(map(lambda x: x["votes_count"], poll_results))
             if max_votes == 0:
-                button = self.random_button()
-                top_result = f"Random (no votes, chose {button})"
+                random_button = self.take_action("random")
+                top_result = f"Random (no votes, chose {random_button})"
             else:
                 top_results = [x for x in poll_results if x["votes_count"] == max_votes]
                 if len(top_results) > 1:
                     top_result = random.choice(top_results)["title"]
                     self.take_action(top_result)
-                    top_result = f"Random (tie vote, chose {self.strip_emoji(top_result)})"
+                    top_result = f"Random (tie vote, chose {top_result})"
                 else:
                     top_result = top_results[0]["title"]
                     self.take_action(top_result)
 
-        frames = self.gameboy.loop_until_stopped()
+        frames = self.game_boy.loop_until_stopped()
         result = False
         if frames >= 70:
-            result = self.gameboy.build_gif("gif_images", self.gameboy_config['gif_outline'])
+            result = self.game_boy.build_gif("gif_images", self.game_boy_config['gif_outline'])
         else:
-            self.gameboy.empty_directory(gif_dir)
+            self.game_boy.empty_directory(gif_dir)
 
-        image = self.gameboy.screenshot()
-        alt_text = 'Screenshot of ' + self.gameboy_config.get('title', 'a Game Boy game.')
+        image = self.game_boy.screenshot()
+        alt_text = 'Screenshot of ' + self.game_boy_config.get('title', 'a Game Boy game.')
         media = self.retry_mastodon_call(
           self.mastodon.media_post,
           retries=5,
@@ -227,9 +197,9 @@ class Bot:
         # Probably add a check here if generating a gif is enabled (so we don't
         # have to generate one every single hour?)
         try:
-            previous_frames = self.gameboy.get_recent_frames("screenshots",
+            previous_frames = self.game_boy.get_recent_frames("screenshots",
                 25,
-                self.gameboy_config['gif_outline']
+                self.game_boy_config['gif_outline']
             )
             previous_media = self.retry_mastodon_call(
                 self.mastodon.media_post,
@@ -249,7 +219,7 @@ class Bot:
             interval=10,
             status=(
                 f"Previous Action: {top_result}\n\n"
-                "#pokemon #gameboy #nintendo #FediPlaysPokemon"
+                "#Pokemon #GameBoy #Nintendo #FediPlaysPokemon"
             ),
             media_ids=[media_ids],
         )
@@ -289,7 +259,7 @@ class Bot:
                 retries=5,
                 interval=10,
                 media_file=result,
-                description="Video of pokemon gold movement",
+                description="Video of Pokémon Gold movement",
             )
             self.retry_mastodon_call(
                 self.mastodon.status_post,
@@ -303,41 +273,41 @@ class Bot:
         self.save_ids(post["id"], poll["id"])
 
         # Save game state
-        self.gameboy.save()
+        self.game_boy.save()
 
     def test(self):
         """Method used for testing"""
-        self.gameboy.load()
-        self.gameboy.get_recent_frames("screenshots", 25)
-        # self.gameboy.build_gif("gif_images")
+        self.game_boy.load()
+        self.game_boy.get_recent_frames("screenshots", 25)
+        # self.game_boy.build_gif("gif_images")
         while True:
             inp = input("Action: ")
             buttons = {
-                "up": self.gameboy.dpad_up,
-                "down": self.gameboy.dpad_down,
-                "right": self.gameboy.dpad_right,
-                "left": self.gameboy.dpad_left,
-                "a": self.gameboy.a,
-                "b": self.gameboy.b,
-                "start": self.gameboy.start,
-                "select": self.gameboy.select,
+                "up": self.game_boy.dpad_up,
+                "down": self.game_boy.dpad_down,
+                "right": self.game_boy.dpad_right,
+                "left": self.game_boy.dpad_left,
+                "a": self.game_boy.a,
+                "b": self.game_boy.b,
+                "start": self.game_boy.start,
+                "select": self.game_boy.select,
             }
             # Perform the corresponding action
-            if inp.lower() in buttons:
-                action = buttons[inp.lower()]
-                # self.gameboy.tick()
+            if inp in buttons:
+                action = buttons[inp]
+                # self.game_boy.tick()
                 action()
-                frames = self.gameboy.loop_until_stopped()
+                frames = self.game_boy.loop_until_stopped()
                 if frames > 51:
-                    self.gameboy.build_gif("gif_images")
+                    self.game_boy.build_gif("gif_images")
                 else:
-                    self.gameboy.empty_directory(gif_dir)
+                    self.game_boy.empty_directory(gif_dir)
             else:
                 print(f"No action defined for '{inp}'.")
-            self.gameboy.save()
-            # self.gameboy.build_gif("gif_images")
+            self.game_boy.save()
+            # self.game_boy.build_gif("gif_images")
             # self.take_action(inp)
-            # self.gameboy.tick(300)
+            # self.game_boy.tick(300)
 
 
 if __name__ == "__main__":
