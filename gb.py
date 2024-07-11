@@ -16,8 +16,8 @@ from pyboy import PyBoy, WindowEvent
 script_dir = os.path.dirname(os.path.realpath(__file__))
 save_loc = os.path.join(script_dir, "save.state")
 
-class Gameboy:
-    """Provides an easy way to interface with pyboy
+class GameBoy:
+    """Provides an easy way to interface with PyBoy
 
     Args:
         rom (str): A string pointing to a rom file (MUST be GB or GBC, no GBA files)
@@ -36,13 +36,13 @@ class Gameboy:
         return self.running
 
     def run(self) -> None:
-        """Continuously loop while pressing random buttons on the gameboy"""
+        """Continuously loop while pressing random buttons on the Game Boy"""
         self.running = True
         while True:
             self.random_button()
 
     def tick(self, ticks=1, gif=True):
-        """Advances the gameboy by a specified number of frames.
+        """Advances the Game Boy by a specified number of frames.
 
         Args:
             ticks (int, optional): The number of frames to advance. Defaults to 1
@@ -55,7 +55,7 @@ class Gameboy:
 
     def compare_frames(self, frame1, frame2):
         """
-        Compares two frames from gameboy screenshot, returns a percentage difference between the two
+        Compares two frames from Game Boy screenshot, returns a percentage difference between the two
         """
         arr1 = np.array(frame1)
         arr2 = np.array(frame2)
@@ -113,12 +113,12 @@ class Gameboy:
         print(len(image_files))
         for file in image_files:
 
-            gameboy_outline = Image.open(
+            game_boy_outline = Image.open(
                 os.path.join(script_dir, gif_outline)
             ).convert("RGB")
             img = Image.open(os.path.join(gif_dir, file)).convert("RGB")
             img = img.resize((822, 733))
-            combined = gameboy_outline.copy()
+            combined = game_boy_outline.copy()
             combined.paste(img, (370, 319)) #370, 319 1192, 1052    
             combined.save(os.path.join(gif_dir, file))
             images.append(os.path.join(gif_dir, file))
@@ -137,11 +137,11 @@ class Gameboy:
         return False
 
     def stop(self):
-        """Stops the continuous gameboy loop"""
+        """Stops the continuous Game Boy loop"""
         self.running = False
 
     def load_rom(self, rom):
-        """Loads the rom into a pyboy object"""
+        """Loads the rom into a PyBoy object"""
         return PyBoy(
             rom,
             window_type="SDL2" if self.debug else "headless",
@@ -151,13 +151,13 @@ class Gameboy:
         )
 
     def dpad_up(self) -> None:
-        """Presses up on the gameboy"""
+        """Presses up on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_UP)
         self.tick(4)
         self.pyboy.send_input(WindowEvent.RELEASE_ARROW_UP)
 
     def dpad_down(self) -> None:
-        """Presses down on the gameboy"""
+        """Presses down on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_DOWN)
         print("down")
         self.tick(3)
@@ -165,7 +165,7 @@ class Gameboy:
         # self.tick()
 
     def dpad_right(self) -> None:
-        """Presses right on the gameboy"""
+        """Presses right on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_RIGHT)
         print("right")
         self.tick(3)
@@ -173,7 +173,7 @@ class Gameboy:
         # self.tick()
 
     def dpad_left(self) -> None:
-        """Presses left on the gameboy"""
+        """Presses left on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_ARROW_LEFT)
         print("left")
         self.tick(3)
@@ -181,7 +181,7 @@ class Gameboy:
         # self.tick()
 
     def a(self) -> None:
-        """Presses a on the gameboy"""
+        """Presses A on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_A)
         print("a")
         self.tick(3)
@@ -189,7 +189,7 @@ class Gameboy:
         # self.tick()
 
     def b(self) -> None:
-        """Presses b on the gameboy"""
+        """Presses B on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_B)
         print("b")
         self.tick(3)
@@ -197,7 +197,7 @@ class Gameboy:
         # self.tick()
 
     def start(self) -> None:
-        """Presses start on the gameboy"""
+        """Presses Start on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_START)
         print("start")
         self.tick(3)
@@ -205,14 +205,14 @@ class Gameboy:
         # self.tick()
 
     def select(self) -> None:
-        """Presses select on the gameboy"""
+        """Presses Select on the Game Boy"""
         self.pyboy.send_input(WindowEvent.PRESS_BUTTON_SELECT)
         print("select")
         self.tick(3)
         self.pyboy.send_input(WindowEvent.RELEASE_BUTTON_SELECT)
 
     def screenshot(self, path="screenshots"):
-        """Takes a screenshot of gameboy screen and saves it to the path"""
+        """Takes a screenshot of Game Boy screen and saves it to the path"""
         screenshot_dir = os.path.join(script_dir, path)
         # Create screenshots directory if it doesn't exist
         os.makedirs(screenshot_dir, exist_ok=True)
@@ -234,7 +234,7 @@ class Gameboy:
         return screenshot_path_full
 
     def random_button(self):
-        """Picks a random button and presses it on the gameboy"""
+        """Picks a random button and presses it on the Game Boy"""
         button = random.choice(
             [
                 self.dpad_up,
@@ -266,7 +266,7 @@ class Gameboy:
             self.pyboy.save_state(file)
 
     def loop_until_stopped(self, threshold=1):
-        """Simulates the gameboy bot"""
+        """Simulates the Game Boy bot"""
         running = True
         previous_frame = None
         current_frame = None
